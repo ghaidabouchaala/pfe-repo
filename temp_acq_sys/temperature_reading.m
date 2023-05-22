@@ -3,7 +3,7 @@ port = serialport("/dev/cu.usbmodem1101", 9600);
 configureTerminator(port, "LF");
 
 % Initialize arrays to store the data
-data = [];
+temp = [];
 time = [];
 type = [];
 % Start a timer
@@ -31,7 +31,7 @@ while toc < 3600
     end
 
     % Append the temperature and time to the data arrays
-    data = [data; temperature];
+    temp = [temp; temperature];
     time = [time; datetime('now')];
     type = [type;string(sensor_type)];
 
@@ -43,7 +43,7 @@ end
 delete(port);
 
 % Create a table and write it to a file
-T = table(time, data, type);
+T = table(time, temp, type);
 try
     writetable(T, "temp_with_anomalies.xlsx");
 catch ME
@@ -55,11 +55,11 @@ end
 %disp(T);
 
 % Plot the data
-plot(time, data);
+plot(time, temp);
 
 % Set the axis limits
 xlim([time(1), time(end)]);
-ylim([min(data)-1, max(data)+1]);
+ylim([min(temp)-1, max(temp)+1]);
 
 % Add labels to the plot
 xlabel("Time");
