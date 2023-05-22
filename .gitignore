@@ -162,4 +162,5 @@ cython_debug/
 
 .ipynb_checkpoints/
 .DS_Store
+temp_acq_sys/.DS_Store
 
