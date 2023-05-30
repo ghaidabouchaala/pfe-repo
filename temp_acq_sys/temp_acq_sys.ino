@@ -27,5 +27,5 @@ void loop() {
   
   Serial.print(sensors.getTempCByIndex(0));  // Print temperature from Dallas DS18B20 sensor
   Serial.println();
-  delay(500);
+  delay(1000);
 }
