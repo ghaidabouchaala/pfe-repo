@@ -8,30 +8,31 @@ XBee xbee = XBee();
 XBeeAddress64 receiverAddr = XBeeAddress64(0x0013A200, 0x41957E70);
 const uint8_t SENDER_1_ID = 1;
 
+unsigned long lastTransmissionTime = 0;
+unsigned long transmissionInterval = 1000;  // Time interval between sending data (5 seconds)
 
 void setup() {
-  Serial.begin(9600);         // Initialize the serial monitor
-  xbeeSerial.begin(9600);     // Set the baud rate for XBee communication
+  Serial.begin(9600);  // Initialize the serial monitor
+  xbeeSerial.begin(9600);  // Set the baud rate for XBee communication
   xbee.setSerial(xbeeSerial);
   Serial.println("Sender 1 node initialized");
 }
 
 void loop() {
-  
+  // Check if enough time has passed since the last transmission
+  if (millis() - lastTransmissionTime >= transmissionInterval) {
+    // Create message
+    String message = "This is sender 1";
 
-  String data = "This is sender 1!";
-  
-  // Create XBee transmission request
-  ZBTxRequest tx = ZBTxRequest(receiverAddr, (uint8_t*)data.c_str(), data.length());
-  
-  /*Serial.print("Sending data to receiver address: ");
-  Serial.print(receiverAddr.getMsb(), HEX);
-  Serial.print(" ");
-  Serial.println(receiverAddr.getLsb(), HEX);*/
-  
-  Serial.println("Sending data from Sender 1...");
-  xbee.send(tx);
-  Serial.println("Data sent from Sender 1.");
-  
-  delay(5000);  // Time interval between sending data (5 seconds)
+    // Create XBee transmission request
+    ZBTxRequest tx = ZBTxRequest(receiverAddr, (uint8_t*)message.c_str(), message.length());
+
+    Serial.println("Sending data from Sender 1...");
+    xbee.send(tx);
+    Serial.println("Data sent from Sender 1.");
+
+    lastTransmissionTime = millis();  // Update the last transmission time
+  }
+
+  delay(100);  // Small delay to avoid excessive looping
 }
