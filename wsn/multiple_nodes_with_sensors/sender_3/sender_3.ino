@@ -1,5 +1,10 @@
 #include <SoftwareSerial.h>
 #include <XBee.h>
+#include <dht11.h>
+
+#define DHT11PIN 7
+
+dht11 DHT11;
 
 SoftwareSerial xbeeSerial(2, 3);  // XBee communication pins (RX, TX)
 XBee xbee = XBee();
@@ -9,7 +14,7 @@ XBeeAddress64 receiverAddr = XBeeAddress64(0x0013A200, 0x41957E70);
 const uint8_t SENDER_1_ID = 3;
 
 unsigned long lastTransmissionTime = 0;
-unsigned long transmissionInterval = 3000;  // Time interval between sending data (5 seconds)
+unsigned long transmissionInterval = 1500;  // Time interval between sending data (5 seconds)
 
 void setup() {
   Serial.begin(9600);  // Initialize the serial monitor
@@ -19,17 +24,19 @@ void setup() {
 }
 
 void loop() {
+  int chk = DHT11.read(DHT11PIN); // Read data from DHT11 sensor
+
   // Check if enough time has passed since the last transmission
   if (millis() - lastTransmissionTime >= transmissionInterval) {
     // Create message
-    String message = "This is sender 3";
+    String message =  "dht11 :" + DHT11.humidity;
+    Serial.println((float)DHT11.humidity); // Print humidity from DHT11 sensor
+
 
     // Create XBee transmission request
     ZBTxRequest tx = ZBTxRequest(receiverAddr, (uint8_t*)message.c_str(), message.length());
 
-    Serial.println("Sending data from Sender 3...");
     xbee.send(tx);
-    Serial.println("Data sent from Sender 3.");
 
     lastTransmissionTime = millis();  // Update the last transmission time
   }
