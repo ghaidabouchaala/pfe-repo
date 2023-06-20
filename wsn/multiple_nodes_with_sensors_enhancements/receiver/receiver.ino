@@ -40,29 +40,28 @@ void loop() {
         ZBRxResponse rx;
         xbee.getResponse().getZBRxResponse(rx);
 
-        // Print received XBee address
+        // Print received XBee address and data packet
         XBeeAddress64 senderAddr = rx.getRemoteAddress64();
-        Serial.print("Received from XBee address: ");
+        Serial.print("[");
         Serial.print(senderAddr.getMsb(), HEX);
         Serial.print(" ");
-        Serial.println(senderAddr.getLsb(), HEX);
+        Serial.print(senderAddr.getLsb(), HEX);
+        Serial.print(":");
 
         // Process received data packet
         String packet = parsePacket(rx.getData(), rx.getDataLength());
+        Serial.print(getSenderID(packet));
+        Serial.print(":");
+        Serial.print(getSensorType(packet));
+        Serial.print(":");
+        Serial.print(getSensorValue(packet));
+        Serial.println("");
 
         // Get the sender ID from the packet
         uint8_t senderID = getSenderID(packet);
 
         // Add packet to the corresponding sender's queue
-        if (senderID == 1) {
-          enqueuePacket(packet, packetQueue1, queueFront1, queueRear1);
-        } else if (senderID == 2) {
-          enqueuePacket(packet, packetQueue2, queueFront2, queueRear2);
-        } else if (senderID == 3) {
-          enqueuePacket(packet, packetQueue3, queueFront3, queueRear3);
-        } else if (senderID == 4) {
-          enqueuePacket(packet, packetQueue4, queueFront4, queueRear4);
-        }
+        enqueuePacket(packet, senderID);
       }
     }
   }
@@ -73,16 +72,19 @@ void loop() {
   processPacketQueue(packetQueue3, queueFront3, queueRear3);
   processPacketQueue(packetQueue4, queueFront4, queueRear4);
 
-  delay(500);  // Add a short delay between each check
+  delay(500);  // Add a short delay between processing loops
 }
 
 String parsePacket(uint8_t* data, uint8_t length) {
   String packet = "";
 
-  // Convert received data bytes to a string
+  // Convert the received data array to a string
   for (int i = 0; i < length; i++) {
     packet += (char)data[i];
   }
+
+  // Add a new line character after the packet
+  packet += "\n";
 
   return packet;
 }
@@ -93,7 +95,33 @@ uint8_t getSenderID(const String& packet) {
   return senderID;
 }
 
-void enqueuePacket(const String& packet, Packet* queue, uint8_t& queueFront, uint8_t& queueRear) {
+void enqueuePacket(const String& packet, uint8_t senderID) {
+  // Determine the corresponding sender's queue
+  Packet* queue;
+  uint8_t queueFront;
+  uint8_t queueRear;
+
+  if (senderID == 1) {
+    queue = packetQueue1;
+    queueFront = queueFront1;
+    queueRear = queueRear1;
+  } else if (senderID == 2) {
+    queue = packetQueue2;
+    queueFront = queueFront2;
+    queueRear = queueRear2;
+  } else if (senderID == 3) {
+    queue = packetQueue3;
+    queueFront = queueFront3;
+    queueRear = queueRear3;
+  } else if (senderID == 4) {
+    queue = packetQueue4;
+    queueFront = queueFront4;
+    queueRear = queueRear4;
+  } else {
+    // Invalid sender ID, discard the packet
+    return;
+  }
+
   // Check if the queue is full
   if ((queueRear + 1) % MAX_QUEUE_SIZE == queueFront) {
     // Queue is full, discard the oldest packet

@@ -1,0 +1,83 @@
+% Data Acquisition and Parsing
+
+% Create a serial port object
+port = serialport("/dev/cu.usbmodem11701", 9600);
+
+% Initialize variables or data structures for storing received data
+senderAddress = [];
+senderID = [];
+sensorType = {};
+sensorValue = [];
+
+% Start a timer
+tic;
+
+while toc < 30
+    % Read data from the serial port
+    data = readline(port);
+
+    % Convert the data to a string
+    data = char(data);
+
+    % Print the received data for verification
+    fprintf("Received: %s\n", data);
+
+    % Check if the received data contains the expected information
+    if startsWith(data, 'Sensor Address:')
+        % Parse the received data
+        [currSenderAddress, currSenderID, currSensorType, currSensorValue] = parseReceivedData(data);
+
+        % Update the received data variables or data structures
+        senderAddress = [senderAddress; currSenderAddress];
+        senderID = [senderID; currSenderID];
+        sensorType = [sensorType; currSensorType];
+        sensorValue = [sensorValue; currSensorValue];
+
+        % Print the parsed data for verification
+        fprintf("Sender Address: %s\n", currSenderAddress);
+        fprintf("Sender ID: %.2f\n", currSenderID);
+        fprintf("Sensor Type: %s\n", currSensorType);
+        fprintf("Sensor Value: %.2f\n", currSensorValue);
+    else
+        % Skip unexpected line
+        fprintf("Skipping unexpected line: %s\n", data);
+    end
+end
+
+% Close the serial port
+delete(port);
+
+% Data Parsing Function
+function [senderAddress, senderID, sensorType, sensorValue] = parseReceivedData(data)
+    % Extract sender Address
+    senderAddressMatch = regexp(data, 'Sensor Address: ([\w\s]+)', 'tokens');
+    if ~isempty(senderAddressMatch)
+        senderAddress = senderAddressMatch{1}{1};
+    else
+        senderAddress = '';
+    end
+
+    % Extract sender ID
+    senderIDMatch = regexp(data, 'Sender ID: (\d+)', 'tokens');
+    if ~isempty(senderIDMatch)
+        senderID = str2double(senderIDMatch{1}{1});
+    else
+        senderID = NaN;
+    end
+
+    % Extract sensor type
+    sensorTypeMatch = regexp(data, 'Sensor Type: (\w+)', 'tokens');
+    if ~isempty(sensorTypeMatch)
+        sensorType = sensorTypeMatch{1}{1};
+    else
+        sensorType = '';
+    end
+
+    % Extract sensor value
+    sensorValueMatch = regexp(data, 'Sensor Value: ([\d.]+)', 'tokens');
+    if ~isempty(sensorValueMatch)
+        sensorValue = str2double(sensorValueMatch{1}{1});
+    else
+        sensorValue = NaN;
+    end
+end
