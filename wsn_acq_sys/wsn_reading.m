@@ -1,5 +1,5 @@
 % Create a serial port object
-port = serialport("/dev/cu.usbmodem11701", 9600);
+port = serialport("/dev/cu.usbmodem111701", 9600);
 
 % Create tables for storing received data from different senders
 sender1Data = table('Size',[0, 4], 'VariableTypes', {'string', 'double', 'string', 'double'}, 'VariableNames', {'Address', 'ID', 'Type', 'Value'});
@@ -7,7 +7,7 @@ sender2Data = table('Size',[0, 4], 'VariableTypes', {'string', 'double', 'string
 sender3Data = table('Size',[0, 4], 'VariableTypes', {'string', 'double', 'string', 'double'}, 'VariableNames', {'Address', 'ID', 'Type', 'Value'});
 sender4Data = table('Size',[0, 4], 'VariableTypes', {'string', 'double', 'string', 'double'}, 'VariableNames', {'Address', 'ID', 'Type', 'Value'});
 
-tic; 
+tic;
 while toc < 15
     % Read data from the serial port
     line = readline(port);
@@ -67,3 +67,7 @@ end
 
 % Close the serial port
 delete(port);
+
+% Measure the execution time for sequential processing
+executionTimeSequential = toc;
+fprintf('Execution time (Sequential): %.2f seconds\n', executionTimeSequential);
