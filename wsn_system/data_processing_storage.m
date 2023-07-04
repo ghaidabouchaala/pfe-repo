@@ -14,7 +14,7 @@ end
 vendor = "MySQL";
 opts = databaseConnectionOptions("jdbc", vendor);
 opts.JDBCDriverLocation = "/Users/ghaidabouchaala/Downloads/mysql-connector-j-8.0.33/mysql-connector-j-8.0.33.jar";
-opts.DatabaseName = "sensor_data";
+opts.DatabaseName = "wsn_data";
 opts.Server = "localhost";
 opts.PortNumber = 3306;
 
@@ -40,10 +40,8 @@ try
         createTableSQL = ['CREATE TABLE IF NOT EXISTS ', senderTableName, ' (Address VARCHAR(255), ID INT, Type VARCHAR(255), Value DOUBLE, Timestamp DATETIME)'];
         exec(conn, createTableSQL);
     end
-    % Try a simple SQL command
-    exec(conn, 'SELECT * FROM sender1');
     tic;
-    while toc < 60
+    while toc < 600
         % Read data from the serial port
         line = char(readline(port));
 
@@ -88,8 +86,6 @@ try
                     senderTableName, parts{1}, str2double(parts{2}), parts{3}, str2double(parts{4}), datestr(now, 'yyyy-mm-dd HH:MM:SS'));
 
 
-
-
                 % Display the insert statement for debugging
                 disp(['Insert statement: ', insertSQL]);
 
@@ -115,11 +111,19 @@ try
         end
     end
 
-    % Close the connection to the database
-    close(conn);
-
 catch ex
     % Display any errors that occur during the execution
     disp('Error occurred:');
     disp(ex.message);
+
 end
+
+% Close the database connection
+if isopen(conn)
+    close(conn);
+    disp('Database connection closed.');
+else
+    disp('Database connection is already closed.');
+end
+
+

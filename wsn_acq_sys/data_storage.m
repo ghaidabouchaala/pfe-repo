@@ -40,8 +40,6 @@ try
         createTableSQL = ['CREATE TABLE IF NOT EXISTS ', senderTableName, ' (Address VARCHAR(255), ID INT, Type VARCHAR(255), Value DOUBLE, Timestamp DATETIME)'];
         exec(conn, createTableSQL);
     end
-    % Try a simple SQL command
-    exec(conn, 'SELECT * FROM sender1');
     tic;
     while toc < 60
         % Read data from the serial port
