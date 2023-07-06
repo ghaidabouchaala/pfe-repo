@@ -1,4 +1,4 @@
-function detect_anomalies(sensorTableName, data_processing_future)
+function detect_anomalies(sensorTableName)
 % Vendor and JDBC Driver details
 vendor = "MySQL";
 opts = databaseConnectionOptions("jdbc", vendor);
@@ -59,7 +59,8 @@ num_steps = numel(var);
 true_position = zeros(num_steps, 1);
 measurements = zeros(num_steps, 1);
 
-clf
+% Initialize the array to store the estimates
+x_estimates = zeros(2, num_steps);
 
 for k = 1:num_steps
     % Update true position
@@ -72,6 +73,9 @@ for k = 1:num_steps
     % Save true position and measurement
     true_position(k) = x(1);
     measurements(k) = var(k);
+
+    % Save the estimate
+    x_estimates(:, k) = x;
 
     % Kalman filter prediction step
     x_pred = A * x;
@@ -131,7 +135,7 @@ time = dt * (1:num_steps);
 figure;
 hold on;
 plot(time, true_position, 'b-', 'LineWidth', 1.5);
-plot(time, x(1:num_steps), 'r--', 'LineWidth', 1.5);
+plot(time, x_estimates(1,:), 'r--', 'LineWidth', 1.5);
 xlabel('Time');
 ylabel('Position');
 legend('True Position', 'Filtered Estimate');

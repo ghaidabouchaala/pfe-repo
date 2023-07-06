@@ -44,7 +44,7 @@ try
             exec(conn, createTableSQL);
         end
         tic;
-        while toc < 300
+        while toc < 60
             % Read data from the serial port
             line = char(readline(port));
 

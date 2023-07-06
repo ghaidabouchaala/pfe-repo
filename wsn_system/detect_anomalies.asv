@@ -1,5 +1,5 @@
-function detect_anomalies(sensorTableName, data_processing_future)
-% Connect to database
+function detect_anomalies(sensorTableName)
+% Vendor and JDBC Driver details
 vendor = "MySQL";
 opts = databaseConnectionOptions("jdbc", vendor);
 opts.JDBCDriverLocation = "/Users/ghaidabouchaala/Downloads/mysql-connector-j-8.0.33/mysql-connector-j-8.0.33.jar";
@@ -10,6 +10,7 @@ opts.PortNumber = 3306;
 username = "root";
 password = "";
 
+% Establishing connection inside worker
 conn = database(opts.DatabaseName, username, password, 'Vendor', vendor, 'Server', opts.Server, 'PortNumber', opts.PortNumber);
 
 if ~isopen(conn)
@@ -58,7 +59,8 @@ num_steps = numel(var);
 true_position = zeros(num_steps, 1);
 measurements = zeros(num_steps, 1);
 
-clf
+% Initialize the array to store the estimates
+x_estimates = zeros(2, num_steps);
 
 for k = 1:num_steps
     % Update true position
@@ -146,4 +148,5 @@ else
     disp('Database connection is already closed.');
 end
 
+close(conn);
 end

@@ -17,8 +17,8 @@ for i = 1:4
 end
 
 
-% Parallel: the ability to collect and store data to the db from the wsn through the
-% data_processing_storage func, after some time make it run in the background, 
+% Parallel: the ability to write to the db through the
+% data_processing_storage func, make it run in the background, 
 % while I analyse the data at the same time through the anomaly detection algo
 % 
 % % Start the data acquisition and processing in a new thread
