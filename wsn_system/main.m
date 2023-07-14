@@ -2,7 +2,7 @@
 % period, once it ends, the anomlay detection algorithm will read from the
 % correspondant table from the database and produce anomaly detection... 
 
-data_processing_storage();
+% data_processing_storage();
 
 % Iterate through all sensors 
 for i = 1:4
@@ -39,3 +39,43 @@ end
 %     detect_anomalies(['sender', num2str(i)], data_processing_future);
 % end
 % delete(gcp); % Close the parallel pool
+
+
+
+% Define a parallel pool, this could be based on your system specifications
+% If you do not specify 'local', the default profile is selected
+% parpool(2); 
+% 
+% % Create a `Future` object for data processing and storage 
+% future_data_proc = parfeval(@data_processing_storage, 0); 
+% 
+% % Wait for data processing to finish
+% wait(future_data_proc); 
+% 
+% % Wait 5 minutes to let data accumulate
+% pause(300); % Pause for 5 minutes
+% 
+% future_anomaly_detection = parfeval(@detect_anomalies, 0, 'sender1');
+% 
+% delete(gcp('nocreate'))
+
+% % Iteratively create `Future` objects for anomaly detection
+% future_anomaly_detection = cell(1, 4);
+% for i = 1:4
+%     % Make sure we wait until data_processing_storage is completed before launching the detect_anomalies function
+%     wait(future_data_proc);
+% 
+%     % Detect anomalies, no need to wait for completion
+%     future_anomaly_detection{i} = parfeval(@detect_anomalies, 0, ['sender', num2str(i)]);
+% end
+% 
+% % We may want to wait until all parallel tasks have finished. 
+% % Wait for all anomaly detection tasks to finish
+% for i = 1:4
+%     wait(future_anomaly_detection{i});
+% end
+
+% Close the parallel pool
+%delete(gcp('nocreate'))
+
+
