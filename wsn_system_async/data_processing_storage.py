@@ -9,12 +9,14 @@ import serial
 import time
 from datetime import datetime
 
-def data_processing_storage(run_duration=None):
+def data_processing_storage(stop_event=None,run_duration=None):
+    
     start_time = time.time()
-
+    
+    
     try:
         # Create a serial port object
-        ser = serial.Serial('/dev/cu.usbmodem111701', 9600)
+        ser = serial.Serial('/dev/cu.usbmodem11701', 9600)
 
         # number of senders
         numSenders = 4
@@ -34,7 +36,7 @@ def data_processing_storage(run_duration=None):
             createTableSQL = "CREATE TABLE IF NOT EXISTS {} (Address VARCHAR(255), ID INT, Type VARCHAR(255), Value DOUBLE, Timestamp DATETIME, InsertionTimestamp DATETIME(6))".format(senderTableName)
             mycursor.execute(createTableSQL)
 
-        while True:
+        while (stop_event is None or not stop_event.is_set()) and (run_duration is None or time.time() - start_time < run_duration):
             # Check if run_duration has passed, if specified
             if run_duration is not None and time.time() - start_time > run_duration:
                 break
